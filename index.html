@@ -61,24 +61,20 @@
 				// console.log(myRoom);
 				allRooms[myRoom].once('value', function(snapshot){
 					var currentDocs = snapshot.child("playerDocs").val();
-					allRooms[myRoom].child("docs").push(foobs);
-					if(snapshot.hasChild("Submissions")) {
-						var subCount = snapshot.child("Submissions").val();
-						console.log(subCount);
-						allRooms[myRoom].child("Submissions").set(parseInt(subCount)+1);
-					} else {
-						console.log(subCount);
-						allRooms[myRoom].child("Submissions").set(1);
-					}
-					console.log(foobs);
+					var numPlayers = snapshot.child("playerCount").val();
+					var subCount = snapshot.child("Submissions").val();
+					var hasStarted = snapshot.child("started").val();
+					allRooms[myRoom].child("docs").push(foobs);					
+					allRooms[myRoom].child("Submissions").set(parseInt(subCount)+1);
+					console.log(subCount);					
 					console.log(allRooms[myRoom].child("docs"));
 					// console.log(snapshot.child("docs").val);
 					// currentDocs.pieces.push([foobs]);	
 					// console.log(currentDocs);		
 					// allRooms[myRoom].child("playerDocs").set(currentDocs);
-					// if(allRooms[myRoom].child("started").val()===0){
-						// allRooms[myRoom].child("started").set(1);
-					// }
+					if(hasStarted===0){
+						allRooms[myRoom].child("started").set(1);
+					}
 				});
 				// console.log(foobs);
 				return foobs;
