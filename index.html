@@ -44,6 +44,7 @@
 	  	  	}
 	  	  	//instantiates first round
 	  	    $('body').append("<h1>Round 1</h1>");
+			$('body').append("<button onclick=getImageUrl()>Submit!</button>");
 			$('body').append("<div id=drawCanvas></div>");
 			var newBoard = new DrawingBoard.Board('drawCanvas', {
 				controls: [
@@ -57,7 +58,6 @@
 				webStorage: 'session',
 				enlargeYourContainer: true
 			});
-			$('body').append("<button onclick=getImageUrl()>Submit!</button>");
 			
 
 			// set playerID to last random doc id
@@ -121,6 +121,7 @@
 				$('body').html('');
 				$('body').append('<h1>Round '+round+'</h1>');
 				$('body').append('<img src='+imgUrl+'>');
+				$('body').append("<button onclick=getImageUrl()>Submit!</button>");
 				$('body').append("<div id=drawCanvas></div>");
 				newBoard = new DrawingBoard.Board('drawCanvas', {
 					controls: [
@@ -134,7 +135,6 @@
 					webStorage: 'session',
 					enlargeYourContainer: true
 				});
-				$('body').append("<button onclick=getImageUrl()>Submit!</button>");
 			};
 			var newRoundNumber = 0;
 			var newRoundStart = function(){
