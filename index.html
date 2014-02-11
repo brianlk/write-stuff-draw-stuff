@@ -172,6 +172,7 @@
 					totalRounds = snapshot.child("playerCount").val();
 					nextRound = "nothing";
 					if(currentRounds===totalRounds+1){
+						console.log('should end');
 						gameEnd();
 					}
 					if(round !== currentRounds && currentRounds>1 && inRoom===true){
@@ -183,7 +184,7 @@
 					$('body').html('');
 					$('body').append('stop breaking things');
 				}
-			},1500);
+			},1000);
 
 		</script>
 	</body>
