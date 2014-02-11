@@ -25,7 +25,7 @@
 			var round;
 			var inRoom = false;
 			var k;
-			var playerID = Date();
+			var playerID = 0;
 	  	    allRooms = {room1Ref: room1Ref, room2Ref: room2Ref, room3Ref: room3Ref};
 	  	    for(var i in allRooms) 
 	  	    {
@@ -78,10 +78,12 @@
 					var subCount = snapshot.child("Submissions").val();
 					var hasStarted = snapshot.child("started").val();
 					var currentDoc = snapshot.child("docs").val();
-					console.log(currentDoc);
 					currentDoc.push(foobs);
-					console.log(currentDoc);
 					allRooms[myRoom].child("docs").set(currentDoc);
+					if(playerID<1){
+						playerID = snapshot.child("docs").val().length;
+					}
+					console.log("playerID: ",playerID);
 					allRooms[myRoom].child("Submissions").set(parseInt(subCount)+1);
 					getPlayerId();
 					if(hasStarted===0){
@@ -116,16 +118,41 @@
 				$('body').append("<button onclick=getImageUrl()>Submit!</button>");
 			};
 
+			var newRoundStart = function(){
+				room1Ref.once('value', function(snapshot){
+					currentRounds = snapshot.child("started").val();
+					totalRounds = snapshot.child("playerCount").val();
+					var newRoundNumber = 0;
+					if(currentRounds+playerID-1>totalRounds){
+						newRoundNumber =currentRounds+playerID - 1 - totalRounds;
+						nextRound = snapshot.child("docs").val()[newRoundNumber];
+						// console.log(snapshot.child("docs").val()[newRoundNumber]);
+						console.log("first Round: ",playerID, " 2nd Round:",newRoundNumber);
+					} else {
+						newRoundNumber = currentRounds+playerID - 1;
+						nextRound = snapshot.child("docs").val()[newRoundNumber];
+						// console.log(snapshot.child("docs").val()[newRoundNumber]);
+						console.log("first Round: ",playerID, " 2nd Round:",newRoundNumber);
+					}
+					clearAndAppend(nextRound);
+				});
+			};
+			var currentRounds;
+			var totalRounds;
+			var nextRound;
 			//constantly searches FB for new round signal then 
 			setInterval(function(){
 				room1Ref.once('value', function(snapshot){
-					var currentRounds = snapshot.child("started").val();
+					currentRounds = snapshot.child("started").val();
+					totalRounds = snapshot.child("playerCount").val();
+					nextRound = "nothing";
 					if(round !== currentRounds && currentRounds>1){
 						round = currentRounds;
-						clearAndAppend();
+						newRoundStart();
 					}
 				});
 			},1500);
+
 
 		</script>
 	</body>
