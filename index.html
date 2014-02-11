@@ -8,9 +8,6 @@
 	</head>
 
 	<body>
-		<ul id="previousImg">
-			
-		</ul>
 		<script>
 
 			var myRootRef = new Firebase('https://amber-fire-337.firebaseio.com/');
@@ -27,6 +24,7 @@
 			var k;
 			var playerID = 0;
 	  	    allRooms = {room1Ref: room1Ref, room2Ref: room2Ref, room3Ref: room3Ref};
+
 	  	    for(var i in allRooms) 
 	  	    {
 	  	  	  allRooms[i].once('value',  
@@ -65,25 +63,43 @@
 			// set playerID to last random doc id
 			var getPlayerId = function(){
 				allRooms[myRoom].once('value', function(snapshot){					
-					console.log(snapshot.val().docs);
+					// console.log(snapshot.val().docs);
 				});
 			};
+
+
 
 			//save canvas image in url
 			// ^subCount , ^started, push info
 			var getImageUrl = function(){
-				var foobs = newBoard.canvas.toDataURL('image/png');
+				var coolBoard = newBoard;
+				foobs = coolBoard.canvas.toDataURL('image/png');
 				allRooms[myRoom].once('value', function(snapshot){					
 					var numPlayers = snapshot.child("playerCount").val();
 					var subCount = snapshot.child("Submissions").val();
 					var hasStarted = snapshot.child("started").val();
 					var currentDoc = snapshot.child("docs").val();
-					currentDoc.push(foobs);
-					allRooms[myRoom].child("docs").set(currentDoc);
+					round = hasStarted;
+					
+					if(hasStarted > 1){
+						if(hasStarted+playerID-1>numPlayers){
+							newRoundNumber = hasStarted+playerID - 1 - numPlayers;
+							currentDoc[newRoundNumber].push(foobs);
+							allRooms[myRoom].child("docs").set(currentDoc);
+						} else {
+							newRoundNumber = hasStarted+playerID - 1;
+							currentDoc[newRoundNumber].push(foobs);
+							allRooms[myRoom].child("docs").set(currentDoc);
+						}
+					} else {
+						currentDoc.push([foobs]);	
+						allRooms[myRoom].child("docs").set(currentDoc);
+					}
+
 					if(playerID<1){
 						playerID = snapshot.child("docs").val().length;
 					}
-					console.log("playerID: ",playerID);
+					
 					allRooms[myRoom].child("Submissions").set(parseInt(subCount)+1);
 					getPlayerId();
 					if(hasStarted===0){
@@ -93,6 +109,9 @@
 						allRooms[myRoom].child("Submissions").set(0);
 						allRooms[myRoom].child("started").set(parseInt(hasStarted)+1);
 					}
+					$('body').html("");
+					$('body').append("<h1>Nice!</h1>");
+					$('body').append("<h2>waiting for your slow friends to finish round "+round+"</h2>");
 				});
 				$('.drawing-board-control-navigation-reset').trigger('click');
 			};
@@ -101,9 +120,9 @@
 			var clearAndAppend = function(imgUrl){
 				$('body').html('');
 				$('body').append('<h1>Round '+round+'</h1>');
-				// $('body').append('<img src='+imgUrl+'>');
+				$('body').append('<img src='+imgUrl+'>');
 				$('body').append("<div id=drawCanvas></div>");
-				var newBoard = new DrawingBoard.Board('drawCanvas', {
+				newBoard = new DrawingBoard.Board('drawCanvas', {
 					controls: [
 						'Color',
 						{ Size: { type: 'dropdown' } },
@@ -117,26 +136,30 @@
 				});
 				$('body').append("<button onclick=getImageUrl()>Submit!</button>");
 			};
-
+			var newRoundNumber = 0;
 			var newRoundStart = function(){
 				room1Ref.once('value', function(snapshot){
 					currentRounds = snapshot.child("started").val();
 					totalRounds = snapshot.child("playerCount").val();
-					var newRoundNumber = 0;
 					if(currentRounds+playerID-1>totalRounds){
 						newRoundNumber =currentRounds+playerID - 1 - totalRounds;
-						nextRound = snapshot.child("docs").val()[newRoundNumber];
-						// console.log(snapshot.child("docs").val()[newRoundNumber]);
-						console.log("first Round: ",playerID, " 2nd Round:",newRoundNumber);
+						console.log(round);
+						nextRound = snapshot.child("docs").val()[newRoundNumber][round-2];
 					} else {
 						newRoundNumber = currentRounds+playerID - 1;
-						nextRound = snapshot.child("docs").val()[newRoundNumber];
-						// console.log(snapshot.child("docs").val()[newRoundNumber]);
-						console.log("first Round: ",playerID, " 2nd Round:",newRoundNumber);
+						console.log(round);
+						nextRound = snapshot.child("docs").val()[newRoundNumber][round-2];
 					}
 					clearAndAppend(nextRound);
 				});
 			};
+
+			var gameEnd = function(){
+				room1Ref.once('value', function(snapshot){
+
+				});
+			};
+
 			var currentRounds;
 			var totalRounds;
 			var nextRound;
@@ -146,6 +169,9 @@
 					currentRounds = snapshot.child("started").val();
 					totalRounds = snapshot.child("playerCount").val();
 					nextRound = "nothing";
+					if(currentRounds===totalRounds+1){
+						gameEnd();
+					}
 					if(round !== currentRounds && currentRounds>1){
 						round = currentRounds;
 						newRoundStart();
