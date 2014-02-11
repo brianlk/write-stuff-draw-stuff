@@ -8,6 +8,9 @@
 	</head>
 
 	<body>
+		<ul id="previousImg">
+			
+		</ul>
 		<script>
 
 			var myRootRef = new Firebase('https://amber-fire-337.firebaseio.com/');
@@ -15,22 +18,25 @@
 			var room1Ref = new Firebase('https://amber-fire-337.firebaseio.com/Rooms/room1');
 			var room2Ref = new Firebase('https://amber-fire-337.firebaseio.com/Rooms/room2');
 			var room3Ref = new Firebase('https://amber-fire-337.firebaseio.com/Rooms/room3');
-
+			var docRef = new Firebase('https://amber-fire-337.firebaseio.com/Rooms/room1/docs');
+			var gameStartRef;
+			var currentDocs;
 			var myRoom;
+			var round;
 			var inRoom = false;
 			var k;
+			var playerID = Date();
 	  	    allRooms = {room1Ref: room1Ref, room2Ref: room2Ref, room3Ref: room3Ref};
 	  	    for(var i in allRooms) 
 	  	    {
-	  	      console.log(allRooms[i]);
 	  	  	  allRooms[i].once('value',  
 	  	  	  	(function(a) { 
-	  	  	  		return function(snapshot) {
+	  	  	  		return function(snapshot) {	  	  	  		 
 	  	  		  	  if(snapshot.val().playerCount<6 && inRoom === false && snapshot.val().started === 0) 
 	  	  		  	  {
 	  	  			  	myRoom = a;
-	  	  			  	inRoom = true;
-		  	  			console.log("entered a room");
+		  				gameStartRef = new Firebase('https://amber-fire-337.firebaseio.com/Rooms/'+myRoom+'/started');
+	  	  			  	inRoom = true;		  	  			
 	  	  			  	var numPlayers = snapshot.child("playerCount").val();
 	  	  			  	allRooms[a].child("playerCount").set(parseInt(numPlayers)+1);
 	  	  		  	  }
@@ -38,7 +44,8 @@
 	  	  		})(i) 
 	  	  	   );
 	  	  	}
-	  	    
+	  	  	//instantiates first round
+	  	    $('body').append("<h1>Round 1</h1>");
 			$('body').append("<div id=drawCanvas></div>");
 			var newBoard = new DrawingBoard.Board('drawCanvas', {
 				controls: [
@@ -54,31 +61,71 @@
 			});
 			$('body').append("<button onclick=getImageUrl()>Submit!</button>");
 			
-			//save canvas image in url
-			var getImageUrl = function(){
 
+			// set playerID to last random doc id
+			var getPlayerId = function(){
+				allRooms[myRoom].once('value', function(snapshot){					
+					console.log(snapshot.val().docs);
+				});
+			};
+
+			//save canvas image in url
+			// ^subCount , ^started, push info
+			var getImageUrl = function(){
 				var foobs = newBoard.canvas.toDataURL('image/png');
-				// console.log(myRoom);
-				allRooms[myRoom].once('value', function(snapshot){
-					var currentDocs = snapshot.child("playerDocs").val();
+				allRooms[myRoom].once('value', function(snapshot){					
 					var numPlayers = snapshot.child("playerCount").val();
 					var subCount = snapshot.child("Submissions").val();
 					var hasStarted = snapshot.child("started").val();
-					allRooms[myRoom].child("docs").push(foobs);					
+					var currentDoc = snapshot.child("docs").val();
+					console.log(currentDoc);
+					currentDoc.push(foobs);
+					console.log(currentDoc);
+					allRooms[myRoom].child("docs").set(currentDoc);
 					allRooms[myRoom].child("Submissions").set(parseInt(subCount)+1);
-					console.log(subCount);					
-					console.log(allRooms[myRoom].child("docs"));
-					// console.log(snapshot.child("docs").val);
-					// currentDocs.pieces.push([foobs]);	
-					// console.log(currentDocs);		
-					// allRooms[myRoom].child("playerDocs").set(currentDocs);
+					getPlayerId();
 					if(hasStarted===0){
 						allRooms[myRoom].child("started").set(1);
 					}
+					if(numPlayers===subCount+1){						
+						allRooms[myRoom].child("Submissions").set(0);
+						allRooms[myRoom].child("started").set(parseInt(hasStarted)+1);
+					}
 				});
-				// console.log(foobs);
-				return foobs;
+				$('.drawing-board-control-navigation-reset').trigger('click');
 			};
+
+			//clears and appends dom on new round
+			var clearAndAppend = function(imgUrl){
+				$('body').html('');
+				$('body').append('<h1>Round '+round+'</h1>');
+				// $('body').append('<img src='+imgUrl+'>');
+				$('body').append("<div id=drawCanvas></div>");
+				var newBoard = new DrawingBoard.Board('drawCanvas', {
+					controls: [
+						'Color',
+						{ Size: { type: 'dropdown' } },
+						{ DrawingMode: { filler: true } },
+						'Navigation',
+						'Download'
+					],
+					size: 1,
+					webStorage: 'session',
+					enlargeYourContainer: true
+				});
+				$('body').append("<button onclick=getImageUrl()>Submit!</button>");
+			};
+
+			//constantly searches FB for new round signal then 
+			setInterval(function(){
+				room1Ref.once('value', function(snapshot){
+					var currentRounds = snapshot.child("started").val();
+					if(round !== currentRounds && currentRounds>1){
+						round = currentRounds;
+						clearAndAppend();
+					}
+				});
+			},1500);
 
 		</script>
 	</body>
