@@ -147,20 +147,29 @@
 				});
 			};
 
-			var displayResults = function() {
-				console.log("reaching displayResults function");
-				$('body').html("");
+			var displayResults = function(stuff) {
+					console.log("reaching displayResults function");
+					console.log($('body').html());
+          $('body').html('');
+          $('body').append("<h1>you're done</h1>");
+          for(var x = 1; x<results.length; x++){
+            $('body').append("<div class=results id="+x+"></div>");
+            for(var j = 0; j<results[x].length; j++){
+              $('#'+x+'').append("<img src="+results[x][j]+">")
+            }
+          }
+					console.log(results);
+					// $('body').append("results")
 			};
 
 			var gameEnd = function(){
 				room1Ref.once('value', function(snapshot){
 					for(var keys in snapshot.child("docs").val()){
 						results.push(snapshot.child("docs").val()[keys]);
-						console.log(results);
 					}
+          displayResults(results);
 				});
 				ended = true;
-				displayResults();
 			};
 
 			var currentRounds;
@@ -174,9 +183,10 @@
 						totalRounds = snapshot.child("playerCount").val();
 						nextRound = "nothing";
 						if(currentRounds===totalRounds+1){
+              ended = true;
 							gameEnd();
 						}
-						if(round !== currentRounds && currentRounds>1 && inRoom===true){
+						if(round !== currentRounds && currentRounds>1 && inRoom===true && ended=== false){
 							round = currentRounds;
 							newRoundStart();
 						}
