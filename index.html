@@ -24,6 +24,7 @@
 			var k;
 			var playerID = 0;
 			var results = [];
+			var ended = false;
 	  	    // allRooms = {room1Ref: room1Ref, room2Ref: room2Ref, room3Ref: room3Ref};
 	  	    allRooms = {room1Ref: room1Ref};
 
@@ -152,6 +153,7 @@
 						console.log(snapshot.child("docs").val()[keys]);
 					}
 				});
+				ended = true;
 			};
 
 			var currentRounds;
