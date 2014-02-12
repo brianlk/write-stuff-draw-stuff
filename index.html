@@ -31,7 +31,7 @@
 	  	  	  allRooms[i].once('value',  
 	  	  	  	(function(a) { 
 	  	  	  		return function(snapshot) {	  	  	  		 
-	  	  		  	  if(snapshot.val().playerCount<4 && inRoom === false && snapshot.val().started === 0) 
+	  	  		  	  if(snapshot.val().playerCount<3 && inRoom === false && snapshot.val().started === 0) 
 	  	  		  	  {
 	  	  			  	myRoom = a;
 		  				gameStartRef = new Firebase('https://amber-fire-337.firebaseio.com/Rooms/'+myRoom+'/started');
@@ -43,8 +43,8 @@
 	  	  		})(i) 
 	  	  	   );
 	  	  	}
+
 	  	  	//instantiates first round
-	  	  	// if(inRoom === true) {
 	  	    $('body').append("<h1>Round 1</h1>");
 			$('body').append("<button onclick=getImageUrl()>Submit!</button>");
 			$('body').append("<div id=drawCanvas></div>");
@@ -60,16 +60,6 @@
 				webStorage: 'session',
 				enlargeYourContainer: true
 			});
-			// }
-
-			// set playerID to last random doc id
-			var getPlayerId = function(){
-				allRooms[myRoom].once('value', function(snapshot){					
-					
-				});
-			};
-
-
 
 			//save canvas image in url
 			// ^subCount , ^started, push info
