@@ -165,7 +165,7 @@
 					currentRounds = snapshot.child("started").val();
 					totalRounds = snapshot.child("playerCount").val();
 					nextRound = "nothing";
-					if(currentRounds===totalRounds+1){
+					if(currentRounds===totalRounds+1 && ended === false){
 						gameEnd();
 					}
 					if(round !== currentRounds && currentRounds>1 && inRoom===true){
