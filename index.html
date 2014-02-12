@@ -23,6 +23,7 @@
 			var inRoom = false;
 			var k;
 			var playerID = 0;
+			var results = [];
 	  	    // allRooms = {room1Ref: room1Ref, room2Ref: room2Ref, room3Ref: room3Ref};
 	  	    allRooms = {room1Ref: room1Ref};
 
@@ -147,7 +148,9 @@
 
 			var gameEnd = function(){
 				room1Ref.once('value', function(snapshot){
-					console.log(myRoom);
+					for(var keys in snapshot.child("docs").val()){
+						console.log(snapshot.child("docs").val()[keys]);
+					}
 				});
 			};
 
@@ -161,7 +164,6 @@
 					totalRounds = snapshot.child("playerCount").val();
 					nextRound = "nothing";
 					if(currentRounds===totalRounds+1){
-						console.log('should end');
 						gameEnd();
 					}
 					if(round !== currentRounds && currentRounds>1 && inRoom===true){
