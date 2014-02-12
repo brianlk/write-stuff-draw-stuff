@@ -148,6 +148,7 @@
 			};
 
 			var displayResults = function() {
+				console.log("reaching displayResults function");
 				$('body').html("");
 			};
 
@@ -155,10 +156,11 @@
 				room1Ref.once('value', function(snapshot){
 					for(var keys in snapshot.child("docs").val()){
 						results.push(snapshot.child("docs").val()[keys]);
+						console.log(results);
 					}
-					displayResults();
 				});
 				ended = true;
+				displayResults();
 			};
 
 			var currentRounds;
@@ -166,21 +168,23 @@
 			var nextRound;
 			//constantly searches FB for new round signal then 
 			setInterval(function(){
-				room1Ref.once('value', function(snapshot){
-					currentRounds = snapshot.child("started").val();
-					totalRounds = snapshot.child("playerCount").val();
-					nextRound = "nothing";
-					if(currentRounds===totalRounds+1 && ended === false){
-						gameEnd();
+				if(ended === false) {
+					room1Ref.once('value', function(snapshot){
+						currentRounds = snapshot.child("started").val();
+						totalRounds = snapshot.child("playerCount").val();
+						nextRound = "nothing";
+						if(currentRounds===totalRounds+1){
+							gameEnd();
+						}
+						if(round !== currentRounds && currentRounds>1 && inRoom===true){
+							round = currentRounds;
+							newRoundStart();
+						}
+					});
+					if(inRoom===false){
+						$('body').html('');
+						$('body').append('stop breaking things');
 					}
-					if(round !== currentRounds && currentRounds>1 && inRoom===true){
-						round = currentRounds;
-						newRoundStart();
-					}
-				});
-				if(inRoom===false){
-					$('body').html('');
-					$('body').append('stop breaking things');
 				}
 			},1000);
 
