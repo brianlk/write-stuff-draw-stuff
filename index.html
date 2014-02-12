@@ -147,11 +147,16 @@
 				});
 			};
 
+			var displayResults = function() {
+				$('body').html("");
+			};
+
 			var gameEnd = function(){
 				room1Ref.once('value', function(snapshot){
 					for(var keys in snapshot.child("docs").val()){
-						console.log(snapshot.child("docs").val()[keys]);
+						results.push(snapshot.child("docs").val()[keys]));
 					}
+					displayResults();
 				});
 				ended = true;
 			};
