@@ -10,3 +10,7 @@
 .results {
   border:3px solid black;
 }
+
+.indRes {
+  border:1px dotted black; 
+}

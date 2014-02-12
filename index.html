@@ -155,7 +155,8 @@
           for(var x = 1; x<results.length; x++){
             $('body').append("<div class=results id="+x+"></div>");
             for(var j = 0; j<results[x].length; j++){
-              $('#'+x+'').append("<img src="+results[x][j]+">")
+              $('#'+x+'').append("<div class=indRes></div>")
+              $('#'+x+',#indRes').append("<img src="+results[x][j]+">")
             }
           }
 					console.log(results);
